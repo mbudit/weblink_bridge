@@ -3,12 +3,12 @@ version: '3.8'
 services:
   bridge:
     build: .
-    container_name: weblink-be
+    container_name: weblink-bridge
     restart: always
     ports:
       - "5000:5000"
     environment:
-      - DB_HOST=192.168.101.211
+      - DB_HOST=192.168.101.215
       - DB_PORT=5432
       - DB_NAME=weblink
       - DB_USER=pguser
