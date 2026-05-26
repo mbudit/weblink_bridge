@@ -15,4 +15,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 5000
 
 # Run bridge.py with waitress (production WSGI server)
-CMD ["python", "-c", "from bridge import app, init_db; init_db(); import waitress; waitress.serve('bridge:app', host='0.0.0.0', port=5000)"]
+CMD ["python", "-c", "from bridge import app, init_db; init_db(); from waitress import serve; serve(app, host='0.0.0.0', port=5000)"]
