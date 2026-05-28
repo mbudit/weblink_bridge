@@ -16,8 +16,10 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(message)s",
     datefmt="%Y-%m-%d %H:%M:%S",
     stream=sys.stdout,
+    force=True,
 )
 logger = logging.getLogger("bridge")
+logger.setLevel(logging.INFO)
 
 
 # --- Configuration (from environment) ---
@@ -131,15 +133,14 @@ def receive_data():
 
         # Log incoming data summary
         device_id = data.get("sys", {}).get("id", "unknown")
-        kws = data.get("kws", {})
-        wellpro = data.get("wellpro", [])
-        env = data.get("env", {})
+        ac = data.get("ac", {})
+        amb = data.get("amb", {})
+        dc = data.get("dc", {})
         links = data.get("links", [])
         logger.info(
             f"INCOMING from {sender_ip} | device={device_id} | "
-            f"kws_v={kws.get('v')} kws_c={kws.get('c')} | "
-            f"wellpro_ch={len(wellpro)} | env_temp={env.get('temp')} | "
-            f"links={len(links)}"
+            f"ac_v={ac.get('volt')} ac_a={ac.get('current')} | "
+            f"amb_temp={amb.get('temp')} dc_vbat={dc.get('vbat')} | links={len(links)}"
         )
 
         conn = get_db_connection()
@@ -176,6 +177,11 @@ def health():
         return jsonify({"status": "unhealthy", "error": str(e)}), 503
 
 if __name__ == '__main__':
+    # Ensure INFO logs aren't silenced by Flask/Werkzeug default WARNING level
+    for name in ['bridge', 'werkzeug', 'flask']:
+        l = logging.getLogger(name)
+        l.setLevel(logging.INFO)
+
     logger.info("Bridge service starting up...")
     logger.info(f"Connecting to DB at {DB_HOST}:{DB_PORT}/{DB_NAME} as {DB_USER}")
     init_db()
